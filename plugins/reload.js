@@ -29,8 +29,14 @@ Plugin.prototype.loadPlugin = function(msg) {
         params = m.split(' ');
 
 	params.shift();
-	irc.send(chan && chan.name || u, 'Reloading plugin: ' + params[0]);
-	irc.loadPlugin(params[0]);
+	var pluginName = params[0];
+	if( !pluginName) {
+		irc.send(chan && chan.name || u, 'Please specify plugin name');
+	}
+	else{
+		irc.send(chan && chan.name || u, 'Reloading plugin: ' + pluginName);
+		irc.loadPlugin(params[0]);
+	}
 
 
 };
