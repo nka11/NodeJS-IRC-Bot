@@ -25,8 +25,11 @@ Plugin = exports.Plugin = function(ph) {
 			that.ph.irc.logger.info(c.remoteAddress, data.toString());
 			c.write("You've been Analrapized!!\n");
             c.end();
+			lines = data.toString().split("\n");
 			for( var chan in that.irc.channels) {
-				that.irc.channels[chan].send(data);
+				for( var line in lines ){
+					that.irc.channels[chan].send(lines[line]);
+				}
 			}
         });
     });
