@@ -25,9 +25,12 @@ Plugin = exports.Plugin = function(ph) {
 			that.ph.irc.logger.info(c.remoteAddress, data.toString());
 			c.write("You've been Analrapized!!\n");
             c.end();
-			lines = data.toString().split("\n");
+			var lines = data.toString().split("\n");
+			var max_lines = 5; //move to config
+			var line_count = 0;
 			for( var chan in that.irc.channels) {
 				for( var line in lines ){
+					if( (++line_count) > max_lines ) break;
 					that.irc.channels[chan].send(lines[line]);
 				}
 			}
