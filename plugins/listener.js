@@ -16,37 +16,54 @@ Plugin = exports.Plugin = function(ph) {
 	this.author = 'Aaron Bassett';
 
 	this.irc = this.ph.irc;
+	if(this.irc.config.pluginConfigs.listener) {
+		this.options = this.irc.config.pluginConfigs.listener;
+	} else {
+		this.options = { '8011': [ '#bottest' ] };
+	}
 
 
 	var that = this;
-	//this server listens for the clients heartbeats and logs them
-    that.listener = net.createServer({allowHalfOpen: true}, function server(c) {
-        c.on('data', function data_muncher(data){
+	that.listener = {};
+	that.get_server = function server(c) {
+		var channels = that.options[this.address().port];
+		c.on('data', function data_muncher(data){
 			that.ph.irc.logger.info(c.remoteAddress, data.toString());
-			c.write("You've been Analrapized!!\n");
-            c.end();
 			var lines = data.toString().split("\n");
 			if ( lines[0].search('HTTP') > -1 ) return;
 			var max_lines = 5; //move to config
 			var line_count = 0;
-			for( var chan in that.irc.channels) {
-				for( var line in lines ){
-					if( (++line_count) > max_lines ) break;
-					that.irc.channels[chan].send(lines[line]);
+			for( var chan_index in channels) {
+				var chan =  channels[chan_index];
+				if( that.irc.channels[chan] ) {
+					c.write("writing to " +  chan + "\n");
+					for( var line in lines ){
+						if( (++line_count) > max_lines ) break;
+						that.irc.channels[chan].send(lines[line]);
+					}
+				}
+				else {
+					c.write("Sorry I'm not in " + chan + "\n");
 				}
 			}
-        });
-    });
+			c.end();
+		});
+	};
+	//this server listens for the clients heartbeats and logs them
+	for ( var port in this.options ) {
+		that.listener[port] = net.createServer({allowHalfOpen: true}, that.get_server);
 
-	that.listener.listen(8012, function() {
-        console.log('server bound');
-    });
+		that.listener[port].listen(port);
+	}
 
 };
 
 
+
 Plugin.prototype.unload = function() {
 	console.log('unloading');
-	this.listener.close();
+	for ( var port in this.options ) {
+		this.listener[port].close();
+	}
 };
 
