@@ -44,3 +44,9 @@ Plugin = exports.Plugin = function(ph) {
 
 };
 
+
+Plugin.prototype.unload = function() {
+	console.log('unloading');
+	this.listener.close();
+};
+

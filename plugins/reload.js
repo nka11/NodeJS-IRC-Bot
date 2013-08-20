@@ -35,7 +35,11 @@ Plugin.prototype.loadPlugin = function(msg) {
 	}
 	else{
 		irc.send(chan && chan.name || u, 'Reloading plugin: ' + pluginName);
-		irc.loadPlugin(params[0]);
+		try {
+			irc.loadPlugin(params[0]);
+		} catch (err) {
+			irc.send(chan && chan.name || u, err);
+		}
 	}
 
 
@@ -43,7 +47,7 @@ Plugin.prototype.loadPlugin = function(msg) {
 
 Plugin.prototype.unloadPlugin = function(msg) {
 	var irc = this.ph.irc, // irc object
-	    c = msg.arguments[0], // channel
+		c = msg.arguments[0], // channel
         chan = irc.channels[c], // channel object
 		u = irc.user(msg.prefix), // user
 		m = msg.arguments[1], // message
@@ -51,5 +55,9 @@ Plugin.prototype.unloadPlugin = function(msg) {
 
 	params.shift();
 	irc.send(chan && chan.name || u, 'unloading plugin: ' + params[ 0]);
-    irc.unloadPlugin(params[0]);
+	try {
+		irc.unloadPlugin(params[0]);
+	} catch (err) {
+		irc.send(chan && chan.name || u, err);
+	}
 };
