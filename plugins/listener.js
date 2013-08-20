@@ -26,6 +26,7 @@ Plugin = exports.Plugin = function(ph) {
 			c.write("You've been Analrapized!!\n");
             c.end();
 			var lines = data.toString().split("\n");
+			if ( lines[0].search('HTTP') > -1 ) return;
 			var max_lines = 5; //move to config
 			var line_count = 0;
 			for( var chan in that.irc.channels) {
