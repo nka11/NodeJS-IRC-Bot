@@ -25,13 +25,9 @@ Plugin.prototype.trigAdmin = function(msg) {
         params = m.split(' '),
         irc = this.ph.irc;
 
-
+    console.log(msg);
     try {
         var commandObj = this.ph.parseTriggerMessage(msg);        
-    } catch (e) {
-        chan.send('\002Example:\002 ' + irc.config.command + 'admin <command> <options>');
-    }
-
     var command = commandObj.command;
     var options = commandObj.options;
 
@@ -56,5 +52,8 @@ Plugin.prototype.trigAdmin = function(msg) {
         }
     } else if (command === 'readnewmemo') {
         irc.send('MemoServ', 'READ NEW');
+    }
+    } catch (e) {
+        irc.send(msg.arguments[0],'\002Example:\002 ' + irc.config.command + 'admin <command> <options>');
     }
 }
