@@ -64,7 +64,7 @@ Plugin.prototype.trigLastSeen = function(msg) {
 	params.shift();
 
 	if (typeof params[0] == 'undefined') {
-		chan.send('\002Example:\002 ' + this.irc.config.command + 'seen <name>');
+		chan.send('\002Example:\002 ' + this.ph.irc.config.command + 'seen <name>');
 	} else {
 		var seek = params[0].toLowerCase();
 

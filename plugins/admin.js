@@ -29,7 +29,7 @@ Plugin.prototype.trigAdmin = function(msg) {
     try {
         var commandObj = this.ph.parseTriggerMessage(msg);        
     } catch (e) {
-        chan.send('\002Example:\002 ' + this.irc.config.command + 'admin <command> <options>');
+        chan.send('\002Example:\002 ' + irc.config.command + 'admin <command> <options>');
     }
 
     var command = commandObj.command;
@@ -54,7 +54,7 @@ Plugin.prototype.trigAdmin = function(msg) {
                 delete irc.channels[options[0]];                    
             }
         }
-    } else if (seek === 'readnewmemo') {
+    } else if (command === 'readnewmemo') {
         irc.send('MemoServ', 'READ NEW');
     }
 }
