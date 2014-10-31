@@ -98,7 +98,9 @@ Plugin = exports.Plugin = function( ph ) {
               var charset = 'utf8';
               var cTypeSplt = res.headers['content-type'].split(';');
               if (cTypeSplt.length > 1 && cTypeSplt[1].indexOf('charset' >= 0)) {
-                charset = cTypeSplt[1].split(' ')[2];
+                if (cTypeSplt[1].split(' ')[2] !== undefined) {
+                  charset = cTypeSplt[1].split(' ')[2];
+                }
               }
               var html = '';
               res.on('data', function(chunk) {
