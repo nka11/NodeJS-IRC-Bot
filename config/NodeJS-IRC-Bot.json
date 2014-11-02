@@ -1,0 +1,23 @@
+{
+        "host":         "chat.freenode.net",
+        "port":         6667,
+        "nick":         "nka-c",
+        "username":     "nka-c",
+        "realname":     "nka's bot",
+        "channels":     ["#hackers-lab"],
+        "pluginConfigs": {
+                "freenode": {
+                        "nickPass":     "ghBotPassword"
+                },
+                "couch": {
+                    "db": "nodebot"
+                },
+                "listener":
+                  { "8011": [ "#hackers-lab" ] }
+
+       },
+        "command":      "%",
+    "logLevel":  "info",
+
+        "plugins":      ["8ball","pagetitle","couchdb_log","couchdb_seen", "couchdb_tell","admin","freenode","global", "reload", "lastseen", "textfilter", "listener"]
+}

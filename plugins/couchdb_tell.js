@@ -13,9 +13,9 @@ Plugin = exports.Plugin = function(ph) {
     this.ph = ph;
 	this.name = this.ph.name;
 
-	this.title = 'CouchDB Seen';
+	this.title = 'CouchDB Tell';
 	this.version = '0.1';
-	this.author = 'Karl Tiedt';
+	this.author = 'Nicolas Karageuzian';
 
 	this.irc = this.ph.irc;
     if (this.irc.config.plugins.indexOf("couchdb_log") === -1) {
@@ -26,11 +26,11 @@ Plugin = exports.Plugin = function(ph) {
     this.fields = ['nick', 'channel', 'host', 'date', 'message', 'type'];
 
     this.db = this.irc.couchdb;
-    this.irc.addTrigger( this, 'seen', this.seen );
+    this.irc.addTrigger( this, 'tell', this.tell );
 };
 
 // Trigger for seen behavior
-Plugin.prototype.seen = function(msg) {
+Plugin.prototype.tell = function(msg) {
 	var irc = this.irc, // irc object
         db = irc.couchdb, // database object
 	    user = irc.user(msg.prefix), // user
@@ -38,35 +38,34 @@ Plugin.prototype.seen = function(msg) {
 		target = (args[0] === irc.nick ? user : args[0]), // target
 		message = args[1], // message
 		params = message.split(' '),
-		_this = this;
+		plugin = this;
 
 	params.shift();
 	if (typeof params[0] == 'undefined') {
-		irc.send(target, user + ':', this.processSeen({}, 'USAGE'));
-	} else {
-		var seen = params[0];
+		irc.send(target, user + ':', this.processTell({}, 'USAGE'));
+	} else if (typeof params[1] == 'undefined') {
+    irc.send(target, user + ':', this.processTell({}, 'USAGE'));
+  } else {
+    var date = Date();
+      var nick = params.shift();
+    irc.on('message', function tellTrigger(mesg) {
+      if (nick == irc.user(mesg.prefix)) {
+        irc.send(target, nick + ":" , " [" + user + "]" + " has left a message for you at " + date);
+        irc.send(target, nick + ":" , params.join(" "));
+        irc.removeListener('message',tellTrigger);
 
-		db.view("log/byUser", {keys:[seen], descending:true}, function(err, res) {
-      console.log(res.rows);
-			if (!res.rows.length) {
-				irc.send(target, user + ':', _this.processSeen({nick: seen}, 'NEGATIVE'));
-				return;
-			}
-
-            var doc = res[0].value;
-
-            doc.date = new Date(doc.date).toGMTString();
-			irc.send(target, user + ':', _this.processSeen(doc));
-		});
+      }
+    });
+    irc.send(target, user + ':', "I have registered your query for " + nick);
 	}
 };
 
 // Processes a document object and returns a formatted string based on those values and optional type passed
 //      If doc.type is not set, type is used instead -- see USAGE and NEGATIVE uses above for examples
-Plugin.prototype.processSeen = function(doc, type) {
+Plugin.prototype.processTell = function(doc, type) {
     var irc = this.irc,
         formats = {
-            'USAGE': 'Usage: ' + irc.command + 'seen <nick>',
+            'USAGE': 'Usage: ' + irc.command + 'seen <nick> <message>',
             'NEGATIVE': 'I have never seen ${nick}, my apologies.',
             'PRIVMSG': '${nick} was last seen chatting in ${channel} at ${date}.',
             'JOIN': '${nick} was last seen joining ${channel} at ${date}.',

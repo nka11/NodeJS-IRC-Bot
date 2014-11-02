@@ -20,13 +20,13 @@ Plugin = exports.Plugin = function(ph) {
 	this.author = 'Karl Tiedt';
 
 	this.irc = this.ph.irc;
-    this.db = c.database('dojobot');
+    this.db = c.database(this.irc.config.pluginConfigs.couch.db);
 
     // fields that are saved to the database documents
     this.fields = ['nick', 'channel', 'host', 'date', 'message', 'type'];
 
     // store reference to the databse connection for other couchdb plugins
-    irc.couchdb = this.db;
+    this.irc.couchdb = this.db;
 };
 
 // onMessage handler for logging
@@ -55,7 +55,7 @@ Plugin.prototype.onQuit = function(msg) {
 Plugin.prototype.onNick = function(msg) {
     var irc = this.irc,
         oldnick = irc.user(msg.prefix),
-        user = irc.users[oldnick],
+        user = this.irc.users[oldnick],
         newnick = msg.arguments[0];
 
     console.log("onNICK: ", oldnick, newnick, typeof irc.users, typeof irc.users[oldnick], typeof irc.users[newnick]);

@@ -23,37 +23,48 @@ Plugin = exports.Plugin = function(ph) {
 	}
 
 
-	var that = this;
-	that.listener = {};
-	that.get_server = function server(c) {
-		var channels = that.options[this.address().port];
+	var plugin = this;
+	plugin.listener = {};
+	plugin.get_server = function server(c) {
+		var channels = plugin.options[this.address().port];
+    var trigger = function(msg){
+      c.write(msg.arguments[0] + ' ' + msg.arguments[1] + '\n');
+    }
+    plugin.irc.on('message',trigger);
+    c.on('timeout', function(){plugin.irc.removeListener('message',trigger)});
+    c.on('end', function(){plugin.irc.removeListener('message',trigger)});
+    c.on('close', function(){plugin.irc.removeListener('message',trigger)});
+    c.on('error', function(){plugin.irc.removeListener('message',trigger)});
 		c.on('data', function data_muncher(data){
-			that.ph.irc.logger.info(c.remoteAddress, data.toString());
+			plugin.ph.irc.logger.info(c.remoteAddress, data.toString());
 			var lines = data.toString().split("\n");
 			if ( lines[0].search('HTTP') > -1 ) return;
 			var max_lines = 5; //move to config
 			var line_count = 0;
 			for( var chan_index in channels) {
 				var chan =  channels[chan_index];
-				if( that.irc.channels[chan] ) {
-					c.write("writing to " +  chan + "\n");
+				if( plugin.irc.channels[chan] ) {
+					//c.write("writing to " +  chan + "\n");
 					for( var line in lines ){
 						if( (++line_count) > max_lines ) break;
-						that.irc.channels[chan].send(lines[line]);
+						plugin.irc.channels[chan].send(lines[line]);
 					}
 				}
 				else {
 					c.write("Sorry I'm not in " + chan + "\n");
 				}
 			}
-			c.end();
+			//c.end();
 		});
 	};
 	//this server listens for the clients heartbeats and logs them
 	for ( var port in this.options ) {
-		that.listener[port] = net.createServer({allowHalfOpen: true}, that.get_server);
 
-		that.listener[port].listen(port);
+
+
+		plugin.listener[port] = net.createServer({allowHalfOpen: true}, plugin.get_server);
+
+		plugin.listener[port].listen(port);
 	}
 
 };
@@ -66,4 +77,3 @@ Plugin.prototype.unload = function() {
 		this.listener[port].close();
 	}
 };
-
