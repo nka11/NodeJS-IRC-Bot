@@ -4,3 +4,5 @@ ircbot.log
 config/lordtaco.json
 config/config.json
 *~
+config/*.json
+*.swp
